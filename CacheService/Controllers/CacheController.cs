@@ -9,10 +9,11 @@ namespace CacheService.Controllers;
 [Route("[controller]")]
 public class CacheController : ControllerBase
 {
-    private static IDbConnection divisorCache = new MySqlConnection("Server=cache-db;Database=cache-database;Uid=div-cache;Pwd=C@ch3d1v;");
+    private IDbConnection divisorCache = new MySqlConnection("Server=cache-db;Database=cache-database;Uid=div-cache;Pwd=C@ch3d1v;");
 
     public CacheController()
     {
+        divisorCache.Open();
         var tables = divisorCache.Query<string>("SHOW TABLES LIKE 'counters'");
        if (!tables.Any())
         {
@@ -23,7 +24,7 @@ public class CacheController : ControllerBase
     [HttpGet]
     public int Get(long number) //få hvor mange divisors et enkelt nummer (param) har
     {
-        divisorCache.Open();
+        
         var divisorCounter = divisorCache.QueryFirstOrDefault<int>("SELECT divisors FROM counters WHERE number = @number", new { number = number });
         return divisorCounter;
     }
@@ -31,11 +32,6 @@ public class CacheController : ControllerBase
     [HttpPost]
     public void Post([FromQuery] long number, [FromQuery] int divisorCounter) //opdater tabel?
     {
-        /*var tables = divisorCache.Query<string>("SHOW TABLES LIKE 'counters'");
-        if (!tables.Any())
-        {
-            divisorCache.Execute("CREATE TABLE counters (number BIGINT NOT NULL PRIMARY KEY, divisors INT NOT NULL)");
-        }*/
 
         divisorCache.Execute("INSERT INTO counters (number, divisors) VALUES (@number, @divisors)", new { number = number, divisors = divisorCounter });
 

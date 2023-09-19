@@ -6,7 +6,6 @@ using MySqlConnector;
 
 public class Program
 {
-    //private static IDbConnection divisorCache = new MySqlConnection("Server=cache-db;Database=cache-database;Uid=div-cache;Pwd=C@ch3d1v;");
     
     public static void Main()
     {
@@ -22,22 +21,17 @@ public class Program
 
         var client = new HttpClient();
         client.BaseAddress = new Uri("http://cache-service/Cache");
-       
-        //int divNumbers = int.Parse(stringResponse.Result);
-
-
 
         for (var i = first; i <= last; i++)
         {
             var innerWatch = Stopwatch.StartNew();
             //my get
-            var internalResponse = client.Send(new HttpRequestMessage(HttpMethod.Get, client.BaseAddress + "?number=1"));
+            var internalResponse = client.Send(new HttpRequestMessage(HttpMethod.Get, client.BaseAddress + "?number=" +i));
             var internalStringResponse = internalResponse.Content.ReadAsStringAsync();
             internalStringResponse.Wait();
             Console.WriteLine("RESP: " + internalStringResponse.Result);
 
             var divisorCounter = int.Parse(internalStringResponse.Result);
-            //var divisorCounter = divisorCache.QueryFirstOrDefault<int>("SELECT divisors FROM counters WHERE number = @number", new { number = i });
 
 
             if (divisorCounter == 0)
@@ -50,10 +44,8 @@ public class Program
                     }
                 }
 
-                var postResponse = client.PostAsync(client.BaseAddress + "?number=1&divisorCounter=1", null);
-                //POST reference i stedet
-                //divisorCache.Execute("INSERT INTO counters (number, divisors) VALUES (@number, @divisors)", new { number = i, divisors = divisorCounter });
-            }   //divisorCache.Post
+                var postResponse = client.PostAsync(client.BaseAddress + "?number="+i + "&divisorCounter="+divisorCounter, null);
+                }   
             
             innerWatch.Stop();
             Console.WriteLine("Counted " + divisorCounter + " divisors for " + i + " in " + innerWatch.ElapsedMilliseconds + "ms");
